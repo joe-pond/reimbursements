@@ -2,18 +2,19 @@ import csv
 import argparse
 from datetime import datetime, timedelta
 
+
 def process_csv(file_path):
     # Dictionary to store the city type for each day (with date as key)
     days_dict = {}
 
-    with open(file_path, newline='') as csvfile:
+    with open(file_path) as csvfile:
         csvreader = csv.DictReader(csvfile)
 
         # Iterate through each project in the CSV
         for project in csvreader:
-            city_type = project['city_type']
-            start_date = datetime.strptime(project['start_date'], '%m/%d/%Y').date()
-            end_date = datetime.strptime(project['end_date'], '%m/%d/%Y').date()
+            city_type = project["city_type"]
+            start_date = datetime.strptime(project["start_date"], "%m/%d/%Y").date()
+            end_date = datetime.strptime(project["end_date"], "%m/%d/%Y").date()
 
             # Generate list of all dates between start_date and end_date
             current_date = start_date
@@ -23,8 +24,8 @@ def process_csv(file_path):
                     days_dict[current_date] = city_type
                 else:
                     # If there is already a city_type for this date and it's HC, we keep HC
-                    if city_type == 'HC':
-                        days_dict[current_date] = 'HC'
+                    if city_type == "HC":
+                        days_dict[current_date] = "HC"
                 current_date += timedelta(days=1)
 
     return days_dict
@@ -41,15 +42,14 @@ def calculate_reimbursement_days(days_dict):
     first_day = sorted_dates[0]
     last_day = sorted_dates[-1]
     total_reimbursement = 45
-    if days_dict[first_day] == 'HC':
+    if days_dict[first_day] == "HC":
         total_reimbursement += 10
 
     # If there is only a single day, don't count it twice
     if first_day != last_day:
         total_reimbursement += 45
-        if days_dict[last_day] == 'HC':
+        if days_dict[last_day] == "HC":
             total_reimbursement += 10
-
 
     for i in range(1, len(sorted_dates) - 1):
         prev_day = sorted_dates[i - 1]
@@ -63,21 +63,20 @@ def calculate_reimbursement_days(days_dict):
             reimbursement = 45
 
         # Check if the city type is HC and add the premium
-        if days_dict[current_day] == 'HC':
+        if days_dict[current_day] == "HC":
             reimbursement += 10
 
         total_reimbursement += reimbursement
 
-
     return total_reimbursement
-
 
 
 def main():
     parser = argparse.ArgumentParser(description="Calculate reimbursement.")
-    parser.add_argument("csv_file", help="Path to the CSV file containing the project data.")
+    parser.add_argument(
+        "csv_file", help="Path to the CSV file containing the project data."
+    )
     args = parser.parse_args()
-
 
     days_dict = process_csv(args.csv_file)
 
